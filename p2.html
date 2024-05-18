@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>taGPT</title>
+<link rel="icon" href="/static/logo1.jpg" type="image/x-icon">
+    <style>
+        body {
+            font-family: monospace;
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 20px;
+            font-size: large;
+        }
+
+        .container {
+            text-align: justify;
+        }
+
+        .heading-with-image {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .heading-with-image img {
+            width: 100px;
+            height: auto;
+            margin-right: 10px;
+            /* Adjust the margin between the image and the text */
+        }
+
+        /* .container {
+            max-width: 600px;
+            margin: auto;
+            margin-bottom: 20px;
+        } */
+        #chat-window {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .chat-message {
+            padding: 10px;
+            border-radius: 20px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: justify;
+        }
+
+        .chat-message.user {
+            background-color: #007bff;
+            color: white;
+            justify-content: end;
+        }
+
+        .chat-message.bot {
+            background-color: #e9ecef;
+            color: black;
+            justify-content: start;
+        }
+
+        .chat-message .avatar img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin: 0 10px;
+        }
+
+        .chat-message .message {
+            max-width: 80%;
+        }
+
+        #user-input,
+        #pdf-upload {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        #user-input input[type="text"],
+        #pdf-upload input[type="file"] {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ced4da;
+            border-radius: 20px 0 0 20px;
+            outline: none;
+            margin-right: -1px;
+            /* Adjust for the button border */
+        }
+
+        #user-input button,
+        #pdf-upload button {
+            padding: 10px 20px;
+            border: none;
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+            border-radius: 0 20px 20px 0;
+        }
+
+        #user-input button:hover,
+        #pdf-upload button:hover {
+            background-color: #0056b3;
+        }
+#chat-window1 {
+       position: fixed;
+            bottom: 0;
+            width: 100%;
+            background-color: #f4f4f4; /* Adjust background color as needed */
+            padding: 10px 0; /* Adjust padding as needed */
+            text-align: center;
+            font-family: "Copyright", sans-serif; /* Change "Copyright" to the specific copyright font you want to use */
+            font-size: 14px; /* Adjust the font size as needed */
+            color: #333; /* Adjust the color as needed */
+            /* Add any other styling you want here */
+    }
+    /* Styling for the upload button */
+    #upload-button {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background-color: #007bff; /* Button background color */
+    color: white; /* Button text color */
+    padding: 10px 20px; /* Button padding */
+    border: none; /* Remove button border */
+    border-radius: 5px; /* Button border radius */
+    cursor: pointer;
+    font-size: 16px; /* Button font size */
+    font-weight: bold; /* Button font weight */
+    transition: background-color 0.3s ease; /* Smooth transition for background color */
+}
+#upload-button:hover {
+    background-color: #0056b3; /* Darker background color on hover */
+}
+
+/* Styling for the pop-up window */
+#upload-popup {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: white;
+    padding: 40px; /* Increased padding for a larger window */
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    z-index: 9999;
+    width: 400px; /* Increased width for a larger window */
+}
+
+#upload-popup input[type="file"] {
+    display: block;
+    margin-bottom: 20px;
+}
+#upload-popup button{
+    padding: 10px 20px;
+    margin-right: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+#upload-popup button.primary {
+    background-color: #007bff;
+    color: white;
+}
+#upload-popup button.secondary {
+    background-color: #e91328;
+    color: white;
+}
+
+#upload-popup button:hover {
+    opacity: 0.8;
+}
+    </style>
+
+</head>
+
+<body>
+
+    <!-- <div class="container">
+    <div id="pdf-upload">
+        <input type="file" id="file-input" multiple accept=".pdf">
+        <button onclick="processPDFs()">Upload PDFs</button>
+    </div>
+</div> -->
+<div  >
+    <button id="upload-button" onclick="openUploadPopup()">Upload File</button>
+</div>
+
+<!-- Upload file popup -->
+<div id="upload-popup" >
+    <h3>Upload File</h3>
+    <input type="file" id="file-input" accept=".pdf">
+    <button class="primary" onclick="uploadFile()">Upload</button>
+    <button class="secondary" onclick="closeUploadPopup()">Cancel</button>
+</div>
+
+
+    <div class="container">
+        <div class="heading-with-image">
+            <img src="/static/logo1.jpg" alt="Image">
+            <h2>taGPT: A Teaching Assistant Chatbot</h2>
+        </div>
+    </div>
+
+    <br />
+
+    <div id="chat-window">
+        DSCI 552: Machine Learning for Data Science
+    </div>
+
+    <div class="container">
+        <div id="user-input">
+            <input type="text" id="user-question" placeholder="Type your query here...">
+            <button onclick="submitQuestion()">Send</button>
+        </div>
+    </div>
+
+<div id="chat-window1">
+        Developed by Team PVC (Haoran Zhang, Venkatesh Dharmaraj, Yichen An)
+    </div>
+
+    <script>
+        function openUploadPopup() {
+            document.getElementById('upload-popup').style.display = 'block';
+        }
+
+        function closeUploadPopup() {
+            document.getElementById('upload-popup').style.display = 'none';
+        }
+
+        function uploadFile() {
+            var fileInput = document.getElementById('file-input');
+            var file = fileInput.files[0];
+            var formData = new FormData();
+            formData.append('file', file);
+            console.log(formData);
+
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            }).then(response => {
+                // Handle response
+                console.log('File uploaded successfully.');
+                closeUploadPopup();
+            }).catch(error => {
+                console.error('Error uploading file:', error);
+            });
+        }
+        function submitQuestion() {
+            var userQuestion = document.getElementById('user-question').value;
+            fetch('/process-question', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ question: userQuestion }),
+            }).then(response => response.json())
+                .then(data => {
+                    // Assuming the backend returns the bot's response in data.response
+                    appendMessage(userQuestion, 'user');
+                    appendMessage(data.response, 'bot', data.images, data.articles, data.videos);
+                    document.getElementById('user-question').value = "";
+                }).catch(error => {
+                    console.error('Error:', error);
+                });
+        }
+    
+        function appendMessage(message, sender, images, articles, videos) {
+    var chatWindow = document.getElementById('chat-window');
+    var messageDiv = document.createElement('div');
+    messageDiv.className = 'chat-message ' + sender;
+
+    // Create a table element
+    var table = document.createElement('table');
+    table.style.borderCollapse = 'collapse'; // Hide borders
+
+    // Create rows
+    var row1 = table.insertRow();
+    var row2 = table.insertRow();
+    var row3 = table.insertRow();
+    var row4 = table.insertRow();
+
+    // Add cells
+    var cell1 = row1.insertCell();
+    var cell2 = row2.insertCell();
+    var cell3 = row3.insertCell();
+    var cell4 = row4.insertCell();
+
+    // Add message text to the first row
+    cell1.innerText = message;
+
+    // Add images to the second row
+    if (images && images.length > 0) {
+        var imagesDiv = document.createElement('div');
+        imagesDiv.style.marginTop = '20px';
+        images.forEach(imageUrl => {
+            var img = document.createElement('img');
+            img.src = imageUrl;
+            // Set fixed size for images
+            img.style.width = '400px'; // Adjust width as needed
+            img.style.height = 'auto';
+            imagesDiv.appendChild(img);
+        });
+        cell2.appendChild(imagesDiv);
+    }
+
+    // Add articles to the third row
+    if (articles && articles.length > 0) {
+    // Create a heading element
+    var articlesHeading = document.createElement('h4');
+    articlesHeading.textContent = 'Reference Article(s)'; // Set the heading text
+
+    // Create the list element
+    var articlesList = document.createElement('ul');
+    articles.forEach(article => {
+        var listItem = document.createElement('li');
+        var link = document.createElement('a');
+        link.href = article;
+        link.target = '_blank'; // Open link in new tab
+        link.innerText = article;
+        listItem.appendChild(link);
+        articlesList.appendChild(listItem);
+    });
+
+    // Append the heading and the list to the cell
+    cell3.appendChild(articlesHeading);
+    cell3.appendChild(articlesList);
+}
+
+    // Add videos to the fourth row
+    if (videos && videos.length > 0) {
+
+        // var videosDiv = document.createElement('div');
+        
+        // videos.forEach(videoUrl => {
+        //     // var video = document.createElement('iframe');
+        //     // console.log(videoUrl);
+        //     // video.src = videoUrl;
+        //     // video.width = '200';
+        //     // video.height = '150';
+        //     // video.frameBorder = '0'; // Hide iframe border
+        //     // videosDiv.appendChild(video);
+        //     var listItem = document.createElement('li');
+        //     var videoLink = document.createElement('a');
+        // videoLink.href = videoUrl;
+        // videoLink.textContent = videoUrl; // Display the video URL as the link text
+        // videoLink.target = '_blank'; // Open the link in a new tab/window
+        // listItem.appendChild(videoLink);
+        // videosDiv.appendChild(listItem);
+        
+        // // Add a line break after each link
+        // videosDiv.appendChild(document.createElement('br'));
+        // });
+        var videoHeading = document.createElement('h4');
+    videoHeading.textContent = 'Reference Video(s)'; // Set the heading text
+
+    // Create the list element
+    var videosList = document.createElement('ul');
+    videos.forEach(video => {
+        var listItem = document.createElement('li');
+        var link = document.createElement('a');
+        link.href = video;
+        link.target = '_blank'; // Open link in new tab
+        link.innerText = video;
+        listItem.appendChild(link);
+        videosList.appendChild(listItem);
+    });
+    
+
+    // Append the heading and the list to the cell
+    cell4.appendChild(videoHeading);
+    cell4.appendChild(videosList);
+    }
+
+    messageDiv.appendChild(table);
+
+            // Add avatar
+            var avatarDiv = document.createElement('div');
+            avatarDiv.className = 'avatar';
+            var img = document.createElement('img');
+            img.src = (sender === 'user' ? 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAOEAAADhCAMAAAAJbSJIAAAAclBMVEX///8AAADx8fEJCQn39/fw8PD8/PzZ2dn09PTi4uKWlpZwcHDQ0NB9fX1jY2Ps7OxJSUm3t7cqKiqlpaVoaGiFhYW/v79DQ0MXFxd5eXktLS1dXV0lJSXIyMigoKA4ODgdHR1VVVWPj4+tra1PT0+Tk5Na8LRmAAAEkElEQVR4nO3d63aqMBAFYCPIpaiI1vut2vb9X/GUti57LJjLkExi9/e/a2UvQJLJkPZ6AAAAAAAAAAAAAAAAAAAAAAAAAH9VEmf9LE64h2FHklaj8XK6ilbT5XhUpY8Wc1HsxP92xYJ7UN0pz6LZueQeWifKdUu+2voBMj7dyVd74h4gUbqRBBRik3IPkmImzVc7cA/TWFIoBRSiCPTVkbwpBhTiLciI8VE5oBDHmHu4+uKJRkAhluFF3GoFFGLLPWBdI82AQsy5h6yn0g4oRMU9aB25QUAhQprB6T6EXwJ6FE3u0Vow92liGFCIUF78suVEu0AWGrFxQCHCeO8fCAmDWGYkU0LCaQhP4oIQUIgQylPPpIQF9/DlMlJAITLuAFK0mzSE21R/UfG/EXcAKWJAEXEHkBlQE4oBdwQJ6mPo/4OoViG9Z8YdQYL2Nqz5/kZckhMuuSNIUCalX6bcESReyAlfuCPcF0fkhCu/14h9esLI75lpFwn73CHuyjpI6Pdd+vi/NL3bphJ9O+4IEjqbhs2O3BEkxuSEY+4IEubV4Avfq8KmWxZXvm9emO2r/ZRzR5AhJ+QOIEVdID5zB5B6JSZ85Q4gVRITBrDVfSIFPHEPXwHtNvX/Ju31BpTlReR7tfQTpa4fRtsQ5aUfwO9MTbWt9Dffa6UX5i+MQC6h+QLD92XFVSLvX29yDKFN4dveKOGQe9g62r6SuefMPWg96l3sF2/cQ9aU6Rbddn6Xuhvovve9X9r/phcxwIB6EYMM+DG3Ud0unQYzl7mVqNWHx57vxdyl0prhe/OFRC5r298G+gj+sL/3Zlz53h+kZtH2kdfyMfLV0vnvXbfjPOjPY39J8tn62k20XM/ygJZK6pI4T4dp/qjHRgCAU3m1MKjOl2Uo89P8syKsWxncf0wLNk8hLPSHl4noRqd0Vn6vQla+Z0wWPyulJ9VJy2D+46/WHk91ssPtkvdZZbT5/OavTnvrQzUyOK8aJteTSjKB2Tetko8ebpT2by/EVdF+SYbztu3UlWfr4oGkxr2dpf2ba9lPZ5LGlJk/L49Yaa9pWYwO1X6YDvfVYVSonAuye/Vkiv5K75pts/GhyW1oL1/tyP3uKM13tFWtWdszqC1eSiK+W7U8uQj4Ycv0gQK9WVYdR1EuoX7wq8d9K9FA76ArujfHd2pK/zZGV+S0/D90nq/msFfDrJmEztmqiucK1hxdRfoHB+acPIvafSRd2rlYUdG/R6dw8LGCy5lME+uTVOrxM3S2y43t5RhXLM/f+C+h7YtI/7yQzu6JZ2bNv93a2AyYcqf7ZLN0Qz99pgs2i8X2604qbH6Vod/bbIPFfumYfvpMF6b2JqdZ0+6Seyt7b8QOTi7pgsXTT5DQESREQiTkZzFhZnc3VJXNT6Rcb1Y0m9gL+Adm3tyFti82y22k8xK6YvfcBf5Sm+1iG+W/AnTFcmGffk4wlfUt/XfmgO+2A3JHdBCQ90Z11HUSt3aF2hXN3fVjDqpisotc2k2KynWDW9Z3yfMWfgAAAAAAAAAAAAAAAAAAAAAAAABF/wCB50Scz71fkQAAAABJRU5ErkJggg==' :
+                'data:image/png;base64,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');
+            avatarDiv.appendChild(img);
+            messageDiv.appendChild(avatarDiv);
+    
+            chatWindow.appendChild(messageDiv);
+        }
+    
+    </script>
+    
+
+</body>
+
+</html>
